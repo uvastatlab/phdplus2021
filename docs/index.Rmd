@@ -37,6 +37,10 @@ Instructor: Jenn Huck
 
 R is a free, open-source software environment and programming language designed specifically for statistical analysis; RStudio is a free, open source integrated development environment (IDE) for R that provides a friendly interface for viewing graphs, data tables, R code, and output all at the same time. This first session provides a gentle introduction to R and RStudio. We’ll get started navigating R with RStudio, loading libraries, and importing data. We’ll do some basic data manipulation and exploration and cover some key practices and shortcuts for using R effectively and helpful resources for learning more.
 
+- [Introduction to R](https://uvastatlab.github.io/phdplus2021/intro_R) 
+- [Download materials](https://github.com/uvastatlab/phdplus2021/raw/main/docs/intro_R_scripts_and_data.zip) (Zip file)
+- [Install or Update R in advance!](https://uvastatlab.github.io/phdplus2021/installR)
+
 
 #### **Data Wrangling and Exploration **
 [Wednesday, 2/17/2021](https://phdplus.virginia.edu/events/phd-data-literacy-r-2-data-wrangling-and-exploration)   
