@@ -1,0 +1,210 @@
+---
+title: "Phd+ Data Literacy in R: Introduction to R"
+author: "Jennifer Huck"
+date: "Spring 2021"
+output:
+  html_document:
+    toc: true
+    toc_float: 
+      collapsed: FALSE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction to R
+
+## Get Ready!
+
+* Before the first session, make sure you have installed or updated R, RStudio, and the tidyverse package. [Installing and updating instructions are here](https://uvastatlab.github.io/phdplus2021/installR).
+* Download the data files and R scripts:  
+    + [Download this zipped folder](https://github.com/uvastatlab/phdplus2021/raw/main/docs/intro_R_scripts_and_data.zip). It contains one data file (albemarle_homes_2020.csv) and two R scripts (intro_R.R, intro_R_answers.R).  
+    + Unzip it and put it somewhere you can locate it on your machine.
+
+## Goals for our Workshop
+
+These are the goals for today's workshop:
+
+- Understand the features of R
+- Know where to look for help and to learn more about R
+- Orient yourself to R and RStudio
+- Understand the basics of working with data: load, explore, and save data
+- Learn some best practices for using R scripts, using data, and projects 
+- Understand the basics of objects, functions, and indexing
+
+The intended audience is beginner-level, with no previous experience using R.
+
+*We will focus on using R for data analysis throughout this series.* 
+
+
+## Features of R
+
+* R is free!
+* R is everywhere, and has an active user base.  This is useful because you can find a lot of people in various disciplines using R in blogs, forums, Stack Overflow, etc., and you can often find help online there. 
+* R is flexible! Since R is open source, the active R user base quickly implements new methods as libraries in R. Over 10,000 packages are available. 
+* R is cool!  It is highly regarded for its:
+    + Graphical functionality. See [gplot2](https://ggplot2.tidyverse.org/), [ggplot extensions](http://www.ggplot2-exts.org/gallery/).
+    + Interactive web functionality.  See [shiny](https://shiny.rstudio.com/gallery/).
+    + Reproducible output, such as documents, presentations, and dashboards.  See [R Markdown](https://rmarkdown.rstudio.com/gallery.html).
+    + Easy integration with other open-source or data science applications, such as Sublime Text, Jupyter Notebooks, GitHub, etc. 
+
+
+# Orientation to R and RStudio 
+
+R is the underlying statistical computing environment. You can think of this like the engine of a car. That makes RStudio like the dashboard^[Credit to [Modern Dive](https://moderndive.com/) for the R and RStudio analogies, and to Marieke Jones and David Martin's HSL Intro to R Workshop.].
+
+![R is the engine](engine.png){width=250px} ![RStudio is the dashboard](dashboard.png){width=250px}
+
+Basically, RStudio makes it easier to use R because it is easier to run and execute code.  After you install R and RStudio, you only need to run RStudio. 
+
+
+## Panes
+
+This is what RStudio looks like when you first open it: 
+
+![Image of RStudio at full screen](R_fullscreen-01.png)
+
+RStudio shows four panes by default.  The two most important are the Console (bottom left) and the Script Editor (top left).
+
+* **Console**: The console pane allows you to quickly and immediately execute R code.  You can experiment with functions here, or quickly print data for viewing. 
+  + Type next to the `>` and press Enter to execute. 
+* **Script Editor**: In contrast to the Console, which quickly runs code, the Script Editor does not automatically execute code.  The Script Editor allows you to save the code essential to your analysis.  You can re-use that code in the moment, refer back to it later, or publish it for replication.  
+  + To open a new R Script go to File...New File...R Script
+* Top Right:
+  + **Environment**: Lists all objects that are saved in memory.  
+  + **History**: Lists all commands recently used.
+  + **Connections**: Allows you to connect to external data stores.
+* Bottom Right:
+  + **Files**: Shows the files available to you in your working directory.
+  + **Plots**: Graphical output goes here.
+  + **Packages**: User library of all the packages you have installed.
+  + **Help**: Find help for R packages and functions.  Don't forget you can type `?` before a function name in the console to get info in the Help section. 
+  + **Viewer**: View locally stored web content (e.g., .rmd files knitted to .html, Shiny)
+
+
+# Working with Scripts and Data, Using your Working Directory
+
+Use scripts to save your work for future analysis.  Scripts are an essential part of reproducibility, either for collaborators, or your future self.  You should rely on them rather than clicking through a graphical user interface.  R script files end with ".R"
+
+We will start by looking at two ways to set your working directory: with the `setwd()` function and with RStudio projects.
+
+R always has a working directory set. The working directory is where R looks for your files, that is, where it looks for your scripts and data.  R will look for other files and directories by starting at the root of your working directory.  The working directory can be any directory (aka folder) -- it doesn't have to be the same folder where you installed R.  
+
+We want to set our working directory to wherever you saved the R script and the dataset for this workshop. You can do this via point-and-click: Session...Set Working Directory...Choose Directory.
+
+You can also set the working directory within the script or in the console.  Use RStudio to copy the file path that points to where you saved the workshop files: Go to the Files pane (lower right box in RStudio) and navigate to the desired directory (you might have to click on the little square with the "..." on the upper right corner of that pane for Go To Directory).  Click More (gear icon)...Copy Folder Path to Clipboard. That always produces a path with forward slashes.
+
+This is an example of how I set my working directory using the console: 
+`setwd("C:/Users/jah2ax.ESERVICES/Box Sync/_R/workshops/intro_R")`
+
+Ideally your scripts will not include `setwd()` because it will not work on someone else's computer.  Also, if I ever move the folder around, it won't work on my computer either!  
+
+There is a better way!  RStudio includes *RStudio Projects* which sets the working directory, provides you with a command history, and gives you a fresh environment (which means it clears out any objects and libraries you may have recently loaded).  You can create an RStudio Project that points to the directory (aka folder) that has all your scripts and data.
+
+*Let's open RStudio, then create a RStudio Project that points to the folder where you have the workshop files saved.*
+
+# Using packages, Using tidyverse
+
+Recall that functions are the "verbs" that allow us to manipulate data.  Packages contain functions, and all functions belong to packages.  For example, `read.csv` belongs to the `utils` package.  
+
+R comes with about 30 packages ("base R").  There are over 10,000 user-contributed packages; you can discover these packages online in Comprehensive R Archive Network (CRAN).  You can find more in active development on GitHub, etc.  CRAN packages are validated to a certain degree; "buyer beware" with packages on GitHub. 
+
+A prevalent collection of packages is `tidyverse`.  "The `tidyverse` is an opinionated collection of R packages designed for data science. All packages share an underlying design philosophy, grammar, and data structures."^[Credit to [https://www.tidyverse.org/](https://www.tidyverse.org/).].   We will take a look at that package in our script. 
+
+In order to use a package, you must install it first.
+
+* You can install packages via point-and-click:
+Tools...Install Packages...Enter `tidyverse` (or a different package name) then click on Install.
+* Or you can use this command in the console: `install.packages("tidyverse")`
+
+Once you have installed the package, you must load the package in any new R session when you want to use that package: type `library(tidyverse)` to load the tidyverse package.
+
+A package is like a lightbulb: you install it once, but you need to turn it on every time you want to use it! 
+
+# Import data into R
+
+We will be working with [Albemarle County Office of Geographic Services](https://www.albemarle.org/government/community-development/gis-mapping/gis-data) real estate data.
+
+You can import almost any kind of data into R.  Your best bet for figuring out how to import a dataset is to google "how to import [file type] into R."  You will likely have to install a package in order to do it.  For example, `haven` is a popular package for importing Stata, SPSS, and SAS files.  Remember you can find the official documentation of packages online at CRAN: https://cran.r-project.org/web/packages/haven/index.html.  The documentation will help you figure out how to use the package. 
+
+*Jump back to our R script "Clear our workspace" (~line 237).*
+
+# Keeping R up to date
+
+Since most people in our workshop have freshly installed R and RStudio, we hopefully didn't encounter any issues with old versions today. But eventually, you will have to update R.
+
+Remember that at the top of the Console, you will see session info, e.g. 
+R version 4.0.3 (2020-10-10) -- "Bunny-Wunnies Freak Out"
+
+This tells us what version of R that RStudio is using. 
+
+You can also check the version with the version command:
+```{r version}
+version
+```
+
+After you load packages, sometimes you will see a Warning Message in red text below the any conflicts:
+
+`Warning message: package 'tidyverse' was built under R version [x.y.z]`
+
+If you see a message like that, it is time to update R. Updating R means that you have to download and install R again. By default, your computer will keep your old version of R, and you can decide if you want to delete it or not. RStudio will automatically recognize the new version of R.  When you install a new version of R, you have to re-install your packages.  Windows users can try the [installr package](https://www.r-statistics.com/2015/06/a-step-by-step-screenshots-tutorial-for-upgrading-r-on-windows/).  
+
+It is a good idea to occasionally check for package updates (e.g., tidyverse): 
+Tools...Check for Package Updates.
+
+It is a good idea to occasionally check for RStudio updates: 
+Help...Check for Updates.
+
+
+# Keep learning
+* In the PhD+ Data Literacy in R series, we will cover:
+    + Data Wrangling and Exploration
+    + Data Visualization
+    + Reporting and Presenting Data using R Markdown
+* Come to more [R Workshops at UVA Library](https://data.library.virginia.edu/training/)!
+    + Intro to Shiny (interactive web apps)
+    + Customizing Shiny Apps
+    + Organizing for Transparent and Reproducible Research
+    + Version Control with GitHub
+    + Reproducible Analysis and Documentation with R and RStudio
+    + Parallelizing R
+* Register for the [Research Data Services newsletter](http://data.library.virginia.edu/newsletters/) to be notified of future workshops.
+
+
+## Local R communities and help!
+
+For those of you looking to build community or just want one-on-one support, we are lucky that we have plenty of in-person/local opportunities:
+
+* Email the UVA Library's StatLab at [statlab@virginia.edu](mailto:statlab@virginia.edu) to set up a consultation or get help over email.
+* UVA Health Science affiliates can take advantage of [HSL's R expertise and workshops](https://guides.hsl.virginia.edu/data). 
+* Join a local R Users Group: 
+    + [UVA R Users Group](http://www.meetup.com/UVa-R-Users-Group/)
+    + [R-Ladies Charlottesville](https://www.meetup.com/rladies-charlottesville/)
+    + [Charlottesville Data Science Meetup](https://www.meetup.com/CharlottesvilleDataScience/)
+    + CIO for grad students: [Data Science and Analytics Club](https://atuva.student.virginia.edu/organization/dsac).  A few other data science CIOs are on grounds.
+
+## Finding help online
+
+The great thing about R is that you can very often find an answer to your question online.
+
+* Google your error! See <http://r4ds.had.co.nz/introduction.html#getting-help-and-learning-more> for excellent suggestions on how to find help for a specific question online.
+
+Don't forget the "official" help resources from R/RStudio. 
+
+* Read official package documentation, see vignettes, e.g., [Tidyverse documentation](https://cran.r-project.org/package=tidyverse)
+* Use the [RStudio Cheat Sheets](https://www.rstudio.com/resources/cheatsheets/)
+* Use the RStudio Help viewer by typing `?` before a function or package
+* Check out the Keyboard Shortcuts Help under Tools in RStudio for some good tips 
+
+
+## Recommended for further learning
+
+* Grolemund. G., and Wickham, H., [*R 4 Data Science*](http://r4ds.had.co.nz/), 2017.
+    + Highly recommended!  This is what I have been using to learn, and you will see a lot of other learning communities rely on this text. 
+    + Chapters 1, 2, 4, 6, 8 are relevant to Intro to R.
+* [Data Carpentry](https://datacarpentry.org/lessons/) offers R lessons with four different curricula: Ecology, Genomics, Social Sciences, and Geospatial data, as well as more curricula under development.
+* [RYouWithMe](https://rladiessydney.org/courses/ryouwithme/) from R-Ladies Sydney offers the basics in intro to R, wrangling, visualization, and R Markdown.
+* Twitter: 
+    + Explore [RStudio Tips](https://twitter.com/rstudiotips) 
+    + Explore [#rstats](https://twitter.com/search?q=%23rstats&src=typed_query), [#rstudioglobal - online 2021 conference](https://twitter.com/search?q=%23rstudioglobal&src=typed_query)
