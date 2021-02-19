@@ -1,0 +1,258 @@
+---
+title: 'Data Exploration and Wrangling'
+author: "Michele Claibourn"
+date: "2/17/2021"
+output:
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: TRUE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+knitr::opts_chunk$set(results = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+```
+
+Today's goals include
+
+* Learning to use dplyr functions for data exploration
+* Thinking about data exploration and preparation as a chance to get to know the data you're working with
+* Using tidyverse functions to go from raw data to a dataset ready for further analysis
+
+
+# dplyr and data exploration
+
+Before we dive in with the data, let's get to know the `dplyr` package. Part of the the [`tidyverse`](https://www.tidyverse.org/), [`dplyr`](https://dplyr.tidyverse.org/)  is a package for data manipulation. The package implements a *grammar* for transforming data, based on verbs/functions that define a set of common tasks.
+
+## Functions/Verbs
+
+`dplyr` functions are for `d`ata frames.
+
+* first argument of `dplyr` functions is always a data frame
+* followed by function specific arguments that detail what to do
+
+Let's look at some quick examples using the Albemarle `homes` data .
+
+```{r}
+library(tidyverse)
+library(lubridate)
+options(tibble.print_min = 5)
+
+homes <- read_csv("data/albemarle_homes_2020.csv")
+```
+
+### count()
+
+<center>
+$\color{blue}{\text{count()}}$ - tally rows by distinct values of  $\color{blue}{\text{variable}}$
+
+</center>
+
+```{r}
+count(homes, condition)
+```
+
+### filter()
+
+<center>
+$\color{green}{\text{filter()}}$ - extract $\color{green}{\text{rows}}$ that meet logical conditions
+
+</center>
+
+```{r}
+filter(homes, condition == "Excellent")
+```
+
+Logical tests
+
+* x **<** y: less than
+* x **>** y: greater than
+* x **==** y: equal to
+* x **<=** y: less than or equal to
+* y **>=** y: greater than or equal to
+* x **!=** y: not equal to
+* x **%in%** y: is a member of
+* **is.na(**x**)**: is NA
+* **!is.na(**x**)**: is not NA
+
+```{r}
+filter(homes, yearbuilt > 2011)
+```
+
+Boolean operators for multiple conditions
+
+* a **&** b: and
+* a **|** b: or
+* **xor(**a,b**)**: exactly or
+* **!**a: not
+
+```{r}
+filter(homes, esdistrict == "Murray" & bedroom <= 2)
+```
+
+### arrange()
+
+<center>
+$\color{green}{\text{arrange()}}$ - order $\color{green}{\text{rows}}$ based on value of designated column(s) 
+
+</center>
+
+```{r}
+arrange(homes, finsqft)
+```
+
+Reverse the order (largest to smallest) with desc()
+
+```{r}
+arrange(homes, desc(finsqft))
+```
+
+### select()
+
+<center>
+$\color{blue}{\text{select()}}$ - extract $\color{blue}{\text{variables}}$ by name
+
+</center>
+
+```{r}
+select(homes, totalvalue)
+```
+
+select() helpers include
+
+* select(.data, **var1:var10**): select range of columns
+* select(.data, **-c(var1, var2)**): select every column but
+* select(.data, **starts_with("string")**): select columns that start with... (or **ends_with("string")**)
+* select(.data, **contains("string")**): select columns whose names contain...
+
+```{r}
+select(homes, lotsize:totalvalue)
+```
+
+### pipes
+The pipe is an operator that allows you to chain together functions. It passes (or pipes) the result on the left into the first argument of the function on the right. It can be read as "and then...".
+
+For instance, if we want the `totalvalue` and `lotsize` for homes in the Murray school district arranged in descending order of lotsize, without the pipe it would look like
+
+```{r}
+arrange(
+  select(
+    filter(homes, esdistrict == "Murray"), 
+    totalvalue, lotsize), 
+  desc(lotsize))
+```
+
+Or we could save the intervening steps
+
+```{r}
+tmp <- filter(homes, esdistrict == "Murray")
+tmp <- select(tmp, totalvalue, lotsize)
+arrange(tmp, desc(lotsize))
+```
+
+Or we could use pipes -- which is easier!
+```{r}
+homes %>% 
+  filter(esdistrict == "Murray") %>% 
+  select(totalvalue, lotsize) %>% 
+  arrange(desc(lotsize))
+```
+
+#### Keyboard Shortcut!
+
+* Mac: cmd + shift + m
+* Windows: ctrl + shift + m
+
+### summarize()
+
+<center>
+$\color{blue}{\text{summarize()}}$ - summarize $\color{blue}{\text{variables}}$ according to a summary function 
+
+</center>
+
+Summary functions include
+
+* **first()**: first value
+* **last()**: last value
+* **nth(**.x, **n)**: nth value
+* **n()**: number of values
+* **n_distinct()**: number of distinct values
+* **min()**: minimum value
+* **max()**: maximum value
+* **mean()**: mean value
+* **median()**: median value
+* **var()**: variance
+* **sd()**: standard deviation
+* **IQR()**: interquartile range
+
+```{r}
+homes %>% 
+  filter(yearbuilt > 0) %>% 
+  summarize(oldest = min(yearbuilt), 
+            newest = max(yearbuilt), 
+            total = n())
+```
+
+Things to note: 
+* multipe summary functions can be called within the same summarize();
+* we can give the summary values new names (though we dont' have to);
+* the `n()` function returns the number of observations (surprisingly useful).
+
+That's not always interesting on it's own, but when combined with `group_by`, it is powerful!
+
+### group_by()
+
+<center>
+$\color{green}{\text{group_by()}}$ - group $\color{green}{\text{rows}}$ by value(s) of column(s) 
+
+</center>
+
+```{r}
+homes %>% 
+  filter(yearbuilt > 0) %>% 
+  group_by(esdistrict) %>% 
+  summarize(oldest = min(yearbuilt), 
+            avgsqft = mean(finsqft), 
+            number = n())
+```
+
+
+
+# Data wrangling and preparation
+Data is usually messy and requires preparation (aka cleaning, wrangling, munging). Now we'll use these functions (and more) to walk through how we got from the original data sources to this more manageable data set, and finish preparing it for analysis using the Albemarle County Real Estate data as an example.
+
+This data was actually derived from three sources within the [Albemarle County Office of Geographic Data Services](https://www.albemarle.org/government/community-development/gis-mapping/gis-data). 
+
+* [Real Estate Information - Parcel Level Data](https://gisweb.albemarle.org/gisdata/CAMA/GIS_View_Redacted_ParcelInfo_TXT.zip) -- containing information about the parcel itself such as owner information, deed acreage value, and assessed value.
+* [Real Estate Information - Card Level Data](https://gisweb.albemarle.org/gisdata/CAMA/GIS_CardLevelData_new_TXT.zip) -- containing property information organized by dwellings or units on a property.
+* [Other Parcel Characteristics](https://gisweb.albemarle.org/gisdata/CAMA/CityView_View_OtherParcelCharacteristics_TXT.zip) -- containing other parcel information such as Zoning and School Districts. 
+
+Our goal is to recreate the `homes` data we've been using from these sources. In creating this data set, the intent was to be able to understand more about the wealth derived from home ownership, the quality and values of residential homes, in our area.
+
+Details are in the script.
+
+## Merging data
+
+We want to take three datasets and create one using a series of merges using  `join` functions. There are several types of `join` functions in R:
+
+* `inner_join(x,y)`: return all rows from x where there are matching values in y, and all columns from x and y. If there are multiple matches between x and y, all combination of the matches are returned.
+
+* `left_join(x,y)`: return all rows from x, and all columns from x and y. Rows in x with no match in y will have NA values in the new columns. If there are multiple matches between x and y, all combinations of the matches are returned.
+
+* `right_join(x,y)`: return all rows from y, and all columns from x and y. Rows in y with no match in x will have NA values in the new columns. If there are multiple matches between x and y, all combinations of the matches are returned.
+
+* `full_join(x,y)`: return all rows and all columns from both x and y. Where there are not matching values, returns NA for the one missing.
+
+
+## Wrangling the data
+
+Reference to some steps we'll take.
+
+1. Make the variable names lowercase: `str_to_lower()` from `stringr` 
+2. Fix misclassified character variables: `mutate(across())`
+3. Fill in some missing values: `mutate()` and `if_else()`
+4. Working with factors: `fct_relevel()`, `fct_collapse()`
