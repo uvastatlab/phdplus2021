@@ -6,6 +6,7 @@ editor_options:
   chunk_output_type: inline
 ---
 
+
 ## Quick Intro to R Notebooks and R Markdown
 
 This is an R Markdown Notebook. It combines markdown, a plain text formatting syntax, and R code. When you execute R code within the notebook, the output appears beneath the code.
@@ -38,8 +39,8 @@ Insert a new R code chunk below and type/run the code: 22/7
 Let's import some data which we'll visualize today using ggplot2. The data we'll work with is Albemarle County real estate data which was downloaded from the Office of Geographic Data Services. We'll use a random sample of the data.
 
 ```{r}
-URL <- "https://github.com/uvastatlab/phdplus2020/raw/master/data/homes.rds"
-homes <- readRDS("../data/homes.rds")
+URL <- "https://github.com/uvastatlab/phdplus2021/raw/main/data/homes.rds"
+homes <- readRDS(url(URL))
 
 ```
 
@@ -104,9 +105,20 @@ It can get much more complicated, but for exploratory visualization this often s
 
 ## Exercise 1 (code along)
 
-Do younger (more recently built) houses have a tendency to be bigger than older houses? Create a scatterplot of finsqft (y-axis) versus age (x-axis). Reminder: Insert a new code chunk by pressing *Ctrl+Alt+I* (Win/Linux) or *Cmd+Option+I* (Mac). Try entering `alpha = 1/5` in `geom_point()`. What does it do?
+Do younger (more recently built) houses have a tendency to be bigger than older houses? Create a scatterplot of finsqft (y-axis) versus age (x-axis). Reminder: Insert a new code chunk by pressing *Ctrl+Alt+I* (Win/Linux) or *Cmd+Option+I* (Mac). 
 
-## More aesthetics and facets
+- Try entering `alpha = 1/10` in `geom_point()`. What does it do?
+- Try entering `shape = "."` in `geom_point()`. What does it do?
+- Try entering `shape = 1` in `geom_point()`. What does it do? (see `?points` shapes and their numeric codes)
+
+```{r}
+ggplot(homes) +
+  aes(x = age, y = finsqft) +
+  geom_point(shape = 1)
+```
+
+
+## More aesthetics and geoms, and introducing facets
 
 Points not only have positions in a plane, but can be different sizes and have different shapes and colors. We can map variables in our data frame to these aesthetics.
 
@@ -124,7 +136,8 @@ We can also map the size of the points to a variable, such as lotsize. Notice I 
 
 ```{r}
 ggplot(homes) +
-  aes(x = finsqft, y = totalvalue, shape = cooling, size = lotsize) +
+  aes(x = finsqft, y = totalvalue, 
+      shape = cooling, size = lotsize) +
   geom_point() 
 
 ```
@@ -138,6 +151,7 @@ ggplot(homes) +
   facet_wrap(~ cooling)
 
 ```
+
 
 We can also have multiple geoms in a plot. Let's say we want to add a smooth trend line that summarizes the relationship between finsqft and totalvalue:
 
@@ -157,7 +171,18 @@ How is totalvalue related to lotsize within each high school district?
 Create a scatterplot of totalvalue (y-axis) vs lotsize (x-axis), faceted by hsdistrict. Add smooth trend lines to summarize the relationship.
 
 
-### Zooming in on data
+## Binning and zooming
+
+Dealing with large amounts to data leads to overplotting. We've seen using alpha values, facets, and different shapes can help decrease the effects of overplotting. Another is binning. As long as you have the `hexbin` package installed, this can be easily accomplished with `geom_-_hexbin`. This "bins" counts of points into hexagons and colors the hexagons according to counts. Lighter colors mean higher counts. Changing the number of bins (default 30 x 30) decreases/increases the number of hexagons.
+
+```{r}
+# install.packages("hexbin")
+ggplot(homes) +
+  aes(x = finsqft, y = totalvalue) +
+  geom_hex(bins = 40) 
+
+```
+
 
 Albemarle county has homes with very large totalvalue and lotsize values. Including them in our plots means we "zoom out" to accommodate them which means we're "far away" from the majority of homes.
 
@@ -172,7 +197,7 @@ ggplot(homes) +
                   ylim = c(0, 2e6)) # from 0 to $2,000,000
 
 ```
-Probably a good idea to tell your audience that your plot is zoomed in and looking at a subset of your data.
+If presenting this plot to an audience, tell them it's zoomed in and looking at a subset of your data.
 
 The numbers are a little hard to read on the y-axis. We can format them as dollar amounts using the labels argument in the `scale_y_continuous()` function. To do this we need to load the scales package, which is installed when you install the ggplot2 package.
 
@@ -182,8 +207,9 @@ ggplot(homes) +
   aes(x = finsqft, y = totalvalue) +
   geom_point() +
   geom_smooth() +
-  coord_cartesian(ylim = c(0, 2e6)) + 
-  scale_y_continuous(labels=dollar) 
+  coord_cartesian(xlim = c(0, 5000),
+                  ylim = c(0, 2e6)) + 
+  scale_y_continuous(labels = dollar) 
 
 ```
 
@@ -277,7 +303,7 @@ ggplot(homes) +
 -   The line in the box is the median.
 -   The top of the box is the 75th percentile.
 -   The bottom of the box is the 25th percentile.
--   The "whiskers" extending out of the box are to the highest and lowest values not to exceed 1.5 \* IQR
+-   The "whiskers" extending out of the box are to the highest and lowest values not to exceed 1.5 x IQR
 -   The dots are considered "outliers" relative to the rest of the data.
 
 A similar plot is the violin plot, which allows us to compare the distributions between categories using smooth density plots. Use `geom_violin()`
@@ -329,6 +355,7 @@ There was a boom sometime after 1750. Which year was it? Around 1950 it seems th
 The above plot shows some interesting trends and events, but it's hard to get precise years and numbers. Fortunately there are ways to make ggplot graphs interactive. Here's one way using the plotly package. Simply call `ggplotly()` immediately after your ggplot code:
 
 ```{r}
+# install.packages("plotly")
 library(plotly)
 ggplot(homes_year) +
   aes(x = yearbuilt, y = n) +
@@ -401,6 +428,7 @@ ggplot(homes) +
 The ggridges package allows us to create ridgeline plots, which are density plots arranged in a staggered fashion. Notice the new geom `geom_density_ridges()`.
 
 ```{r}
+# install.packages("ggridges")
 library(ggridges)
 ggplot(homes) +
   aes(x = totalvalue, y = censustract) + 
@@ -436,7 +464,7 @@ ggplot(homes) +
 
 ```
 
-NOTE: `ggplotly` doesn't work with plots made by ggridges.
+NOTE: `ggplotly` does not work with plots made by ggridges.
 
 ## Creating maps in ggplot2
 
@@ -448,13 +476,16 @@ The ggplot2 package has geoms for "sf" objects to help us easily render a map. L
 
 
 ```{r}
-library(tigris)
+# install.packages("tigris")
+# library(tigris)
 
 # this is going to download about 15 MB of data; may take a second
-alb <- tracts(state = "VA", county = "Albemarle")
+# alb <- tracts(state = "VA", county = "Albemarle")
+
+alb <- readRDS(url("https://github.com/uvastatlab/phdplus2021/raw/main/data/alb.rds"))
 
 ggplot(alb) +
-  geom_sf(color = "red") +
+  geom_sf() +
   theme_void() 
 ```
 
@@ -464,7 +495,7 @@ That's nice but it would help if the census tracts were labeled. We can do that 
 ```{r}
 ggplot(alb) +
   aes(label = NAME) +
-  geom_sf(color = "red") +
+  geom_sf() +
   geom_sf_text(size = 3) + # size = 3 makes text smaller
   theme_void() 
 ```
@@ -474,7 +505,7 @@ Now we can see most of the labels, but there's still some overplotting. It would
 ```{r}
 ggplot(alb) +
   aes(label = NAME) +
-  geom_sf(color = "red") +
+  geom_sf() +
   geom_sf_text(size = 3) +
   theme_void()
 ggplotly()
@@ -498,7 +529,7 @@ To shade the census tract regions we set the fill aesthetic to totalvalue. Hover
 ```{r}
 ggplot(alb) +
   aes(fill = totalvalue, label = NAME) +
-  geom_sf(color = "red") +
+  geom_sf() +
   geom_sf_text(size = 3) +
   scale_fill_continuous("Median home value", 
                         labels = dollar) +
