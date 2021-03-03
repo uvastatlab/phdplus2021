@@ -95,7 +95,7 @@ One major difference between documents and presentations is that `##` indicates 
 
 Today's session will involve learning R Markdown in the context of a HTML document, but most everything we learn will translate to presentations.
 
-See [Chapter 4](https://bookdown.org/yihui/rmarkdown/presentations.html) of the R Markdown book [\@-rmd] for details on presentations.
+See [Chapter 4](https://bookdown.org/yihui/rmarkdown/presentations.html) of the R Markdown book [-@rmd] for details on presentations.
 
 ## An R Markdown Workflow
 
